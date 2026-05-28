@@ -1,0 +1,8 @@
+{
+  "name": "Predictive Observability Prototype",
+  "description": "An APM prototype targeting SRE leadership with predictive incident forecasting features.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
