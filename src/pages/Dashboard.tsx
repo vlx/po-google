@@ -1,8 +1,8 @@
-import { Activity, AlertTriangle, Shield, Target } from 'lucide-react';
+import { AlertTriangle, Radar, Zap } from 'lucide-react';
 
 export function Dashboard() {
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-8">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100 tracking-tight">Executive Summary</h1>
@@ -20,15 +20,15 @@ export function Dashboard() {
         </div>
       </div>
 
-      {/* KPI Cards Skeleton */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* KPI Cards: Predictive Intelligence Focus */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
-          { label: 'System Health Score', value: '98.4%', trend: '+0.2%', icon: <Activity className="w-5 h-5 text-emerald-400"/>, color: 'border-emerald-500/20 bg-emerald-500/5' },
-          { label: 'Predicted Incidents (48h)', value: '2 High Risk', trend: '+1', icon: <AlertTriangle className="w-5 h-5 text-rose-400"/>, color: 'border-rose-500/20 bg-rose-500/5' },
-          { label: 'Error Budget Remaining', value: '84.2%', trend: '-1.5%', icon: <Shield className="w-5 h-5 text-indigo-500 dark:text-indigo-400"/>, color: 'border-indigo-500/20 bg-indigo-500/5' },
-          { label: 'SLO Attainment', value: '99.98%', trend: '+0.05%', icon: <Target className="w-5 h-5 text-amber-500 dark:text-amber-400"/>, color: 'border-amber-500/20 bg-amber-500/5' }
+          { label: 'Active Anomalies', value: '3', trend: '-2', icon: <Radar className="w-5 h-5 text-amber-500 dark:text-amber-400"/>, color: 'border-amber-500/20 bg-amber-500/5' },
+          { label: 'Predicted Incidents', value: '2 High Risk', trend: '+1', icon: <AlertTriangle className="w-5 h-5 text-rose-500 dark:text-rose-400"/>, color: 'border-rose-500/20 bg-rose-500/5' },
+          { label: 'Emerging Risk Signatures', value: '12 Patterns', trend: '+3', icon: <Zap className="w-5 h-5 text-indigo-500 dark:text-indigo-400"/>, color: 'border-indigo-500/20 bg-indigo-500/5' }
         ].map((stat, i) => (
-          <div key={i} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm transition-colors duration-200">
+          <div key={i} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm transition-colors duration-200 relative overflow-hidden">
+            <div className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-indigo-500/0 via-indigo-500/40 to-indigo-500/0" />
             <div className="flex items-center justify-between">
                 <div className={`p-2 rounded-lg ${stat.color}`}>
                     {stat.icon}

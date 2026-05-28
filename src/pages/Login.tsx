@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { ShieldAlert, Activity, HeartPulse } from 'lucide-react';
+import { ShieldAlert, Radar } from 'lucide-react';
 
 interface LoginProps {
   onLogin: () => void;
@@ -16,7 +16,7 @@ export function Login({ onLogin }: LoginProps) {
           className="flex justify-center"
         >
           <div className="rounded-xl bg-indigo-500/10 p-3 ring-1 ring-indigo-500/20">
-            <Activity className="h-10 w-10 text-indigo-600 dark:text-indigo-400" />
+            <Radar className="h-10 w-10 text-indigo-600 dark:text-indigo-400" />
           </div>
         </motion.div>
         <motion.h2
