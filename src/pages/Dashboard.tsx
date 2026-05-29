@@ -1,5 +1,5 @@
 import { AlertTriangle, Zap, Info, Activity, Database, Server, ChevronRight, UserPlus, CheckCircle2 } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 
 // Mock telemetry data with history and forecast
 const telemetryData = [
@@ -10,11 +10,10 @@ const telemetryData = [
   { time: '16:00', load: 70, forecast: 70 },
   { time: '20:00', load: 60, forecast: 60 },
   { time: 'Now', load: 55, forecast: 55 },
-  { time: '+04:00', forecast: 65, isPrediction: true },
-  { time: '+08:00', forecast: 88, isPrediction: true, incident: "Conn Timeout", prob: "92%" },
-  { time: '+12:00', forecast: 95, isPrediction: true, risk: true, incident: "Worker OOM", prob: "85%" },
-  { time: '+16:00', forecast: 75, isPrediction: true },
-  { time: '+20:00', forecast: 62, isPrediction: true, incident: "Cache Hit Drop", prob: "78%" },
+  { time: '+04:00', forecast: 92, isPrediction: true, incident: "Conn Timeout", prob: "92%" },
+  { time: '+08:00', forecast: 88, isPrediction: true },
+  { time: '+12:00', forecast: 85, isPrediction: true, risk: true, incident: "Worker OOM", prob: "85%" },
+  { time: '+18:00', forecast: 78, isPrediction: true , incident: "Cache Hit Drop", prob: "78%" },
   { time: '+24:00', forecast: 50, isPrediction: true },
 ];
 
@@ -30,6 +29,41 @@ const PredictionDot = (props: any) => {
     </g>
   );
 };
+
+const CustomXAxisTick = ({ x, y, payload }: any) => {
+  const isNow = payload.value === 'Now';
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text
+        x={0}
+        y={0}
+        dy={10}
+        textAnchor="middle"
+        fill={isNow ? undefined : '#64748b'}
+        fontSize={12}
+        fontWeight={isNow ? 'bold' : 'normal'}
+        className={isNow ? 'fill-slate-900 dark:fill-slate-100' : ''}
+      >
+        {payload.value}
+      </text>
+    </g>
+  );
+};
+
+const emergingPatterns = [
+  { id: 10, title: "5xx Rate Anomaly", component: "payment-api", desc: "Sudden burst of 502 Bad Gateway responses on callbacks.", severity: "Critical", time: "10m ago" },
+  { id: 5, title: "Disk I/O Wait Time Increase", component: "auth-db", desc: "Read latency spiking during key validation phase.", severity: "Critical", time: "15m ago" },
+  { id: 6, title: "Spiky CPU Throttling", component: "index-svc", desc: "Containers hitting CPU limits during batch processing.", severity: "Warning", time: "30m ago" },
+  { id: 9, title: "Unhealthy Pod Churn", component: "image-proc", desc: "Multiple pod restarts due to liveness probe timeouts.", severity: "Warning", time: "45m ago" },
+  { id: 1, title: "DB Connection Pool Saturation", component: "checkout-db", desc: "pg-bouncer queue growing 12% hourly against stable RPS.", severity: "Warning", time: "1h ago" },
+  { id: 12, title: "Queue Backlog", component: "email-worker", desc: "Consumer lag indicates processing bottleneck.", severity: "Warning", time: "1h ago" },
+  { id: 2, title: "Memory Leak Signature", component: "nodesrv-v3", desc: "OOM risk profile matches prior regression.", severity: "Critical", time: "2h ago" },
+  { id: 8, title: "Eviction Rate Spike", component: "cache-layer", desc: "Volatile-lru evictions up by 400% against baseline.", severity: "Warning", time: "2h ago" },
+  { id: 7, title: "Dropped Packets", component: "cluster-ingress", desc: "Packet drop rate increasing up to 2% intermittently.", severity: "Notice", time: "4h ago" },
+  { id: 3, title: "API Gateway Latency Shift", component: "api-gateway", desc: "P99 latency trailing drift towards 500ms timeout.", severity: "Notice", time: "5h ago" },
+  { id: 11, title: "High GC Pause", component: "search-api", desc: "JVM garbage collection pauses exceeding 2 seconds.", severity: "Notice", time: "6h ago" },
+  { id: 4, title: "Worker OOM Rate", component: "bg-workers", desc: "Background workers being killed slightly above baseline.", severity: "Notice", time: "12h ago" },
+];
 
 export function Dashboard() {
   const scrollToEmerging = () => {
@@ -149,15 +183,11 @@ export function Dashboard() {
           
           <div className="w-full h-[300px] mt-4">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={telemetryData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <ComposedChart data={telemetryData} margin={{ top: 20, right: 30, left: 0, bottom: 10 }}>
                 <defs>
                   <linearGradient id="colorLoad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
                     <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
-                  </linearGradient>
-                  <linearGradient id="colorForecast" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.2} />
@@ -165,8 +195,7 @@ export function Dashboard() {
                   dataKey="time" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fontSize: 12, fill: '#64748b' }}
-                  dy={10}
+                  tick={<CustomXAxisTick />}
                 />
                 <YAxis 
                   axisLine={false} 
@@ -189,19 +218,17 @@ export function Dashboard() {
                   fill="url(#colorLoad)" 
                   activeDot={{ r: 4, fill: '#6366f1' }}
                 />
-                {/* Forecast Area */}
-                <Area 
+                {/* Forecast Line */}
+                <Line 
                   type="monotone" 
                   dataKey="forecast" 
                   stroke="#f43f5e" 
                   strokeWidth={2}
                   strokeDasharray="4 4"
-                  fillOpacity={1} 
-                  fill="url(#colorForecast)" 
-                  activeDot={<PredictionDot />}
                   dot={<PredictionDot />}
+                  activeDot={<PredictionDot />}
                 />
-              </AreaChart>
+              </ComposedChart>
             </ResponsiveContainer>
           </div>
         </div>
@@ -323,43 +350,52 @@ export function Dashboard() {
 
       {/* Emerging Behavioral Patterns (Full width) */}
       <div id="emerging-patterns" className="pt-4 scroll-mt-20">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm transition-colors duration-200 flex flex-col">
-          <h3 className="text-base font-medium text-slate-800 dark:text-slate-200 mb-4">Emerging Behavioral Patterns</h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
-            Signatures detected matching historical failure precursors before incident thresholds are crossed.
-          </p>
-          <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             {[
-               { icon: <Database className="w-4 h-4 text-amber-500" />, title: "DB Connection Pool Saturation", desc: "checkout-db pg-bouncer queue growing 12% hourly.", severity: "Warning", time: "1h ago" },
-               { icon: <Server className="w-4 h-4 text-rose-500" />, title: "Memory Leak Signature", desc: "OOM risk profile matches prior nodesrv-v3 regression.", severity: "Critical", time: "2h ago" },
-               { icon: <Activity className="w-4 h-4 text-indigo-500" />, title: "API Gateway Latency Shift", desc: "P99 latency trailing drift towards 500ms timeout.", severity: "Notice", time: "5h ago" },
-               { icon: <Server className="w-4 h-4 text-indigo-500" />, title: "Worker OOM Rate", desc: "Background workers being killed slightly above baseline.", severity: "Notice", time: "12h ago" },
-             ].map((pattern, i) => (
-                <li key={i} className="flex gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
-                    <div className="shrink-0 mt-0.5">
-                      <div className="p-1.5 rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-sm group-hover:scale-105 transition-transform">
-                        {pattern.icon}
-                      </div>
-                    </div>
-                    <div className="flex-1 flex flex-col">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-sm font-medium text-slate-800 dark:text-slate-200">{pattern.title}</h4>
-                      </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-2 leading-relaxed">{pattern.desc}</p>
-                      <div className="flex items-center justify-between mt-auto">
-                        <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded border uppercase tracking-wider ${
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm transition-colors duration-200 flex flex-col overflow-hidden">
+          <div className="p-6 border-b border-slate-200 dark:border-slate-800">
+            <h3 className="text-base font-medium text-slate-800 dark:text-slate-200 mb-1">Emerging Behavioral Patterns</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Signatures detected matching historical failure precursors before incident thresholds are crossed.
+            </p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[800px]">
+              <thead className="bg-slate-50/50 dark:bg-slate-800/20">
+                <tr className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                   <th className="font-medium px-4 py-2 border-b border-slate-200 dark:border-slate-800">Severity</th>
+                   <th className="font-medium px-4 py-2 border-b border-slate-200 dark:border-slate-800">Signature & Description</th>
+                   <th className="font-medium px-4 py-2 border-b border-slate-200 dark:border-slate-800">Subsystem</th>
+                   <th className="font-medium px-4 py-2 border-b border-slate-200 dark:border-slate-800 text-right">First Seen</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm divide-y divide-slate-100 dark:divide-slate-800/50">
+                {emergingPatterns.map((pattern) => (
+                  <tr key={pattern.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors group cursor-pointer">
+                    <td className="px-4 py-2 whitespace-nowrap">
+                      <span className={`inline-flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded border uppercase tracking-wider ${
                           pattern.severity === 'Critical' ? 'text-rose-600 border-rose-200 bg-rose-50 dark:text-rose-400 dark:border-rose-900/50 dark:bg-rose-500/10' :
                           pattern.severity === 'Warning' ? 'text-amber-600 border-amber-200 bg-amber-50 dark:text-amber-400 dark:border-amber-900/50 dark:bg-amber-500/10' :
                           'text-indigo-600 border-indigo-200 bg-indigo-50 dark:text-indigo-400 dark:border-indigo-900/50 dark:bg-indigo-500/10'
                         }`}>
                           {pattern.severity}
-                        </span>
-                        <span className="text-[10px] text-slate-400 dark:text-slate-500">{pattern.time}</span>
-                      </div>
-                    </div>
-                </li>
-             ))}
-          </ul>
+                      </span>
+                    </td>
+                    <td className="px-4 py-2">
+                      <div className="font-medium text-[13px] text-slate-900 dark:text-slate-100 mb-0.5">{pattern.title}</div>
+                      <div className="text-[12px] leading-tight text-slate-500 dark:text-slate-400">{pattern.desc}</div>
+                    </td>
+                    <td className="px-4 py-2 whitespace-nowrap">
+                      <span className="font-mono text-[11px] text-slate-600 dark:text-slate-500 bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 px-1.5 py-0.5 rounded">
+                        {pattern.component}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2 whitespace-nowrap text-right text-[12px] text-slate-500 dark:text-slate-400">
+                      {pattern.time}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
