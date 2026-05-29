@@ -56,15 +56,27 @@ export function Layout({ children, currentRoute, onRouteChange, user, onLogout }
             <div className="hidden sm:flex items-center ml-3 shrink-0">
               <span className="font-semibold tracking-tight text-slate-900 dark:text-white">SRE Predict</span>
               <span className="mx-3 text-slate-300 dark:text-slate-700">|</span>
-              <button className="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 py-1.5 px-2.5 rounded-lg transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
-                <span>Production</span>
-                <span className="text-slate-300 dark:text-slate-600">|</span>
-                <span className="flex items-center gap-1.5">
+              <div className="flex items-center bg-transparent border border-transparent rounded-lg">
+                <button className="flex items-center gap-1 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 py-1.5 px-2.5 rounded-lg transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
+                  <span>Production</span>
+                  <ChevronDown className="w-3.5 h-3.5 opacity-50" />
+                </button>
+                <div className="mx-1 h-3 w-px bg-slate-200 dark:bg-slate-700"></div>
+                <button 
+                  className="flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 py-1.5 px-2 rounded-lg transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+                  title="View System Health"
+                >
                   <span className="text-slate-500 dark:text-slate-400">Health:</span>
                   <span className="text-emerald-600 dark:text-emerald-400">98.4%</span>
-                </span>
-                <ChevronDown className="w-3.5 h-3.5 opacity-50 ml-0.5" />
-              </button>
+                </button>
+                <div className="mx-1 h-3 w-px bg-slate-200 dark:bg-slate-700"></div>
+                <button 
+                  className="flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 py-1.5 px-2 rounded-lg transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+                  title="View Active Anomalies"
+                >
+                  <span className="text-amber-600 dark:text-amber-400">3 anomalies</span>
+                </button>
+              </div>
             </div>
           </div>
 

@@ -1,6 +1,45 @@
-import { AlertTriangle, Radar, Zap, Info } from 'lucide-react';
+import { AlertTriangle, Zap, Info, Activity, Database, Server, ChevronRight, UserPlus, CheckCircle2 } from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+
+// Mock telemetry data with history and forecast
+const telemetryData = [
+  { time: '00:00', load: 45, forecast: 45 },
+  { time: '04:00', load: 52, forecast: 52 },
+  { time: '08:00', load: 78, forecast: 78 },
+  { time: '12:00', load: 85, forecast: 85 },
+  { time: '16:00', load: 70, forecast: 70 },
+  { time: '20:00', load: 60, forecast: 60 },
+  { time: 'Now', load: 55, forecast: 55 },
+  { time: '+04:00', forecast: 65, isPrediction: true },
+  { time: '+08:00', forecast: 88, isPrediction: true, incident: "Conn Timeout", prob: "92%" },
+  { time: '+12:00', forecast: 95, isPrediction: true, risk: true, incident: "Worker OOM", prob: "85%" },
+  { time: '+16:00', forecast: 75, isPrediction: true },
+  { time: '+20:00', forecast: 62, isPrediction: true, incident: "Cache Hit Drop", prob: "78%" },
+  { time: '+24:00', forecast: 50, isPrediction: true },
+];
+
+const PredictionDot = (props: any) => {
+  const { cx, cy, payload } = props;
+  if (!payload.incident) return null;
+  return (
+    <g>
+      <circle cx={cx} cy={cy} r={5} fill="#f43f5e" stroke="#fff" strokeWidth={2} className="dark:stroke-slate-900" />
+      <text x={cx} y={cy - 12} textAnchor="middle" fill="#f43f5e" fontSize={11} fontWeight="600">
+        {payload.prob}
+      </text>
+    </g>
+  );
+};
 
 export function Dashboard() {
+  const scrollToEmerging = () => {
+    document.getElementById('emerging-patterns')?.scrollIntoView({ behavior: 'smooth' });
+  };
+  
+  const scrollToPredictions = () => {
+    document.getElementById('predictions-list')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       <div className="flex items-center justify-between">
@@ -21,25 +60,18 @@ export function Dashboard() {
       </div>
 
       {/* KPI Cards: Predictive Intelligence Focus */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {[
           { 
-            label: 'Active Anomalies', 
-            value: '3', 
-            trend: '-2', 
-            trendType: 'positive',
-            helpText: 'Current anomalies detected in production telemetry streams.',
-            icon: <Radar className="w-5 h-5 text-amber-500 dark:text-amber-400"/>, 
-            color: 'border-amber-500/20 bg-amber-500/5' 
-          },
-          { 
             label: 'Predicted Incidents', 
-            value: '2 High Risk', 
+            value: '3 Total', 
             trend: '+1', 
             trendType: 'negative',
             helpText: 'Outages or degradations likely to occur within the forecast horizon.',
             icon: <AlertTriangle className="w-5 h-5 text-rose-500 dark:text-rose-400"/>, 
-            color: 'border-rose-500/20 bg-rose-500/5' 
+            color: 'border-rose-500/20 bg-rose-500/5',
+            onClick: scrollToPredictions,
+            hasLink: true
           },
           { 
             label: 'Emerging Risk Signatures', 
@@ -48,11 +80,17 @@ export function Dashboard() {
             trendType: 'negative',
             helpText: 'New behavioral patterns deviating from baselines, not yet critical.',
             icon: <Zap className="w-5 h-5 text-indigo-500 dark:text-indigo-400"/>, 
-            color: 'border-indigo-500/20 bg-indigo-500/5' 
+            color: 'border-indigo-500/20 bg-indigo-500/5',
+            onClick: scrollToEmerging,
+            hasLink: true
           }
         ].map((stat, i) => (
-          <div key={i} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm transition-colors duration-200 relative">
-            <div className="absolute top-0 inset-x-0 h-0.5 rounded-t-xl bg-gradient-to-r from-indigo-500/0 via-indigo-500/40 to-indigo-500/0" />
+          <div 
+            key={i} 
+            onClick={stat.onClick}
+            className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm transition-all duration-200 relative group ${stat.hasLink ? 'cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-700/50 hover:shadow-md' : ''}`}
+          >
+            <div className={`absolute top-0 inset-x-0 h-0.5 rounded-t-xl bg-gradient-to-r from-indigo-500/0 via-indigo-500/40 to-indigo-500/0 ${stat.hasLink ? 'group-hover:via-indigo-500/60' : ''}`} />
             <div className="flex items-center justify-between">
                 <div className={`p-2 rounded-lg ${stat.color}`}>
                     {stat.icon}
@@ -65,40 +103,260 @@ export function Dashboard() {
                     : 'text-slate-600 dark:text-slate-500 bg-slate-100 dark:bg-slate-800'
                 }`}>{stat.trend}</span>
             </div>
-            <div className="mt-4">
-                <div className="text-3xl font-semibold text-slate-900 dark:text-slate-100">{stat.value}</div>
-                <div className="flex items-center gap-1.5 mt-1">
-                    <div className="text-sm font-medium text-slate-500 dark:text-slate-400">{stat.label}</div>
-                    <div className="group relative flex cursor-help">
-                        <Info className="w-4 h-4 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors" />
-                        <div className="opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 absolute bottom-full pb-2 left-1/2 -translate-x-1/2 mb-1 w-56 pointer-events-none z-10">
-                          <div className="p-2.5 bg-slate-900 dark:bg-slate-800 border border-slate-700 rounded-lg shadow-xl text-xs text-slate-200 text-center font-normal relative">
-                            {stat.helpText}
-                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900 dark:border-t-slate-700 text-slate-900 dark:text-slate-700"></div>
+            <div className="mt-4 flex items-end justify-between">
+              <div>
+                  <div className="text-3xl font-semibold text-slate-900 dark:text-slate-100">{stat.value}</div>
+                  <div className="flex items-center gap-1.5 mt-1">
+                      <div className="text-sm font-medium text-slate-500 dark:text-slate-400">{stat.label}</div>
+                      <div className="group/help relative flex cursor-help">
+                          <Info className="w-4 h-4 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 transition-colors" />
+                          <div className="opacity-0 invisible group-hover/help:opacity-100 group-hover/help:visible transition-all duration-200 absolute bottom-full pb-2 left-1/2 -translate-x-1/2 mb-1 w-56 pointer-events-none z-10">
+                            <div className="p-2.5 bg-slate-900 dark:bg-slate-800 border border-slate-700 rounded-lg shadow-xl text-xs text-slate-200 text-center font-normal relative">
+                              {stat.helpText}
+                              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900 dark:border-t-slate-700 text-slate-900 dark:text-slate-700"></div>
+                            </div>
                           </div>
-                        </div>
-                    </div>
-                </div>
+                      </div>
+                  </div>
+              </div>
+              {stat.hasLink && (
+                 <div className="text-indigo-600 dark:text-indigo-400 flex items-center gap-1 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    View
+                    <ChevronRight className="w-4 h-4" />
+                 </div>
+              )}
             </div>
           </div>
         ))}
       </div>
 
-      {/* Layout Grids Skeleton */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 min-h-[400px] shadow-sm transition-colors duration-200">
-          <h3 className="text-base font-medium text-slate-800 dark:text-slate-200 mb-4">Predictive Failure Forecaster</h3>
-          <div className="w-full h-4/5 rounded border border-slate-200 dark:border-slate-800/50 bg-slate-50 dark:bg-slate-950/50 flex items-center justify-center transition-colors">
-             <span className="text-slate-500 dark:text-slate-500 text-sm">[ Time-series forecast chart placeholder ]</span>
+      {/* Layout Grid */}
+      <div className="space-y-6">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 min-h-[400px] shadow-sm transition-colors duration-200 flex flex-col">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-base font-medium text-slate-800 dark:text-slate-200">Predictive Failure Forecaster</h3>
+            <div className="flex gap-4 text-xs font-medium">
+              <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
+                <span className="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+                Observed System Load
+              </div>
+              <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-500 border border-current opacity-70"></span>
+                Forecast Projection
+              </div>
+            </div>
+          </div>
+          
+          <div className="w-full h-[300px] mt-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={telemetryData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorLoad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorForecast" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.2} />
+                <XAxis 
+                  dataKey="time" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 12, fill: '#64748b' }}
+                  dy={10}
+                />
+                <YAxis 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 12, fill: '#64748b' }}
+                />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '8px', color: '#f1f5f9' }}
+                  itemStyle={{ color: '#e2e8f0' }}
+                />
+                <ReferenceLine x="Now" stroke="#94a3b8" strokeDasharray="3 3" label={{ position: 'top', value: 'Prediction Boundary', fill: '#94a3b8', fontSize: 11 }} />
+                
+                {/* Historical Area */}
+                <Area 
+                  type="monotone" 
+                  dataKey="load" 
+                  stroke="#6366f1" 
+                  strokeWidth={2}
+                  fillOpacity={1} 
+                  fill="url(#colorLoad)" 
+                  activeDot={{ r: 4, fill: '#6366f1' }}
+                />
+                {/* Forecast Area */}
+                <Area 
+                  type="monotone" 
+                  dataKey="forecast" 
+                  stroke="#f43f5e" 
+                  strokeWidth={2}
+                  strokeDasharray="4 4"
+                  fillOpacity={1} 
+                  fill="url(#colorForecast)" 
+                  activeDot={<PredictionDot />}
+                  dot={<PredictionDot />}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </div>
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm transition-colors duration-200">
+      </div>
+
+      {/* Predictions List View Section */}
+      <div id="predictions-list" className="pt-4 scroll-mt-20">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Actionable Predictions</h2>
+          <div className="text-sm text-slate-500 dark:text-slate-400">Within next 24 hours</div>
+        </div>
+        
+        <div className="space-y-4">
+          {[
+            {
+              id: 1,
+              title: "Payment Gateway Connection Timeout",
+              subsystem: "checkout-db, payment-service",
+              risk: "High",
+              probability: "92%",
+              timeToImpact: "~4 hours",
+              desc: "Sustained increase in checkout-db queue combined with P99 latency growth in payment-service indicates high probability of connection exhaustion.",
+              action: "Scale up pg-bouncer instances and temporarily route non-critical reads to replicas.",
+              status: "pending"
+            },
+            {
+              id: 2,
+              title: "Worker Node OOM Cascade",
+              subsystem: "background-workers, memory-cache",
+              risk: "High",
+              probability: "85%",
+              timeToImpact: "~12 hours",
+              desc: "Memory leak signature detected in long-running job queues. Historical pattern leads to OOM cascade if current allocation rate continues.",
+              action: "Trigger rolling restart of worker pool and isolate job batch ID #84992 for inspection.",
+              status: "pending"
+            },
+            {
+              id: 3,
+              title: "Cache Hit Ratio Degradation",
+              subsystem: "redis-cluster, catalog-api",
+              risk: "Medium",
+              probability: "78%",
+              timeToImpact: "~18 hours",
+              desc: "Eviction rates are growing due to expanding catalog size. Cache hit ratio expected to drop below 80% SLA threshold.",
+              action: "Provision additional Redis shards and update TTL policies for low-frequency catalog items.",
+              status: "pending"
+            }
+          ].map((prediction) => (
+            <div key={prediction.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm transition-colors duration-200">
+              <div className="flex flex-col lg:flex-row gap-6">
+                
+                {/* Status/Risk Column */}
+                <div className="w-full lg:w-48 shrink-0 flex flex-row lg:flex-col justify-between lg:justify-start gap-4 lg:gap-2">
+                  <div>
+                    <div className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Risk Level</div>
+                    <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-sm font-medium border ${
+                      prediction.risk === 'High' ? 'text-rose-700 bg-rose-50 border-rose-200 dark:text-rose-400 dark:bg-rose-500/10 dark:border-rose-900/50' : 
+                      'text-amber-700 bg-amber-50 border-amber-200 dark:text-amber-400 dark:bg-amber-500/10 dark:border-amber-900/50'
+                    }`}>
+                      <AlertTriangle className="w-4 h-4" />
+                      {prediction.risk}
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-6 lg:flex-col lg:gap-2">
+                    <div>
+                      <div className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Probability</div>
+                      <div className="text-lg font-semibold text-slate-900 dark:text-slate-100">{prediction.probability}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Est. Impact</div>
+                      <div className="text-sm font-medium text-slate-700 dark:text-slate-300">{prediction.timeToImpact}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Details Column */}
+                <div className="flex-1 flex flex-col min-w-0">
+                  <div className="flex items-start justify-between gap-4 mb-3">
+                    <div>
+                      <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100">{prediction.title}</h3>
+                      <div className="text-sm text-indigo-600 dark:text-indigo-400 font-medium mt-1">
+                        Affected: {prediction.subsystem}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+                    {prediction.desc}
+                  </p>
+
+                  {/* Recommended Action */}
+                  <div className="mt-auto bg-slate-50 dark:bg-slate-950/50 rounded-lg p-4 border border-slate-100 dark:border-slate-800/80">
+                    <div className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-amber-500" />
+                      Recommended Action
+                    </div>
+                    <p className="text-sm font-medium text-slate-800 dark:text-slate-200 mb-4">
+                      {prediction.action}
+                    </p>
+                    <div className="flex flex-wrap gap-3">
+                      <button className="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-md shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900">
+                        <CheckCircle2 className="w-4 h-4" />
+                        Execute Action
+                      </button>
+                      <button className="inline-flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium rounded-md shadow-sm transition-colors">
+                        <UserPlus className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                        Assign Team
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Emerging Behavioral Patterns (Full width) */}
+      <div id="emerging-patterns" className="pt-4 scroll-mt-20">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm transition-colors duration-200 flex flex-col">
           <h3 className="text-base font-medium text-slate-800 dark:text-slate-200 mb-4">Emerging Behavioral Patterns</h3>
-          <ul className="space-y-3">
-             {[1,2,3,4].map((i) => (
-                <li key={i} className="flex flex-col gap-1 p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 transition-colors">
-                    <div className="h-4 bg-slate-200 dark:bg-slate-800 w-3/4 animate-pulse rounded"></div>
-                    <div className="h-3 bg-slate-200 dark:bg-slate-800/50 w-1/2 animate-pulse rounded mt-2"></div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+            Signatures detected matching historical failure precursors before incident thresholds are crossed.
+          </p>
+          <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             {[
+               { icon: <Database className="w-4 h-4 text-amber-500" />, title: "DB Connection Pool Saturation", desc: "checkout-db pg-bouncer queue growing 12% hourly.", severity: "Warning", time: "1h ago" },
+               { icon: <Server className="w-4 h-4 text-rose-500" />, title: "Memory Leak Signature", desc: "OOM risk profile matches prior nodesrv-v3 regression.", severity: "Critical", time: "2h ago" },
+               { icon: <Activity className="w-4 h-4 text-indigo-500" />, title: "API Gateway Latency Shift", desc: "P99 latency trailing drift towards 500ms timeout.", severity: "Notice", time: "5h ago" },
+               { icon: <Server className="w-4 h-4 text-indigo-500" />, title: "Worker OOM Rate", desc: "Background workers being killed slightly above baseline.", severity: "Notice", time: "12h ago" },
+             ].map((pattern, i) => (
+                <li key={i} className="flex gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/20 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
+                    <div className="shrink-0 mt-0.5">
+                      <div className="p-1.5 rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-sm group-hover:scale-105 transition-transform">
+                        {pattern.icon}
+                      </div>
+                    </div>
+                    <div className="flex-1 flex flex-col">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-medium text-slate-800 dark:text-slate-200">{pattern.title}</h4>
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-2 leading-relaxed">{pattern.desc}</p>
+                      <div className="flex items-center justify-between mt-auto">
+                        <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded border uppercase tracking-wider ${
+                          pattern.severity === 'Critical' ? 'text-rose-600 border-rose-200 bg-rose-50 dark:text-rose-400 dark:border-rose-900/50 dark:bg-rose-500/10' :
+                          pattern.severity === 'Warning' ? 'text-amber-600 border-amber-200 bg-amber-50 dark:text-amber-400 dark:border-amber-900/50 dark:bg-amber-500/10' :
+                          'text-indigo-600 border-indigo-200 bg-indigo-50 dark:text-indigo-400 dark:border-indigo-900/50 dark:bg-indigo-500/10'
+                        }`}>
+                          {pattern.severity}
+                        </span>
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500">{pattern.time}</span>
+                      </div>
+                    </div>
                 </li>
              ))}
           </ul>

@@ -14,7 +14,7 @@ export default function App() {
     id: 'u-1',
     name: 'SRE Lead',
     role: 'Staff Reliability Engineer',
-    email: 'vlikyov@gmail.com'
+    email: 'sre@acme.com'
   };
 
   if (!isAuthenticated) {
