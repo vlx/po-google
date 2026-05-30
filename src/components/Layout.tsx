@@ -29,10 +29,10 @@ export function Layout({ children, currentRoute, onRouteChange, user, onLogout }
   const { theme, toggleTheme } = useTheme();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const navItems: { id: AppRoute; label: string; icon: ReactNode }[] = [
+  const navItems: { id: AppRoute; label: string; icon: ReactNode; badge?: number }[] = [
     { id: 'DASHBOARD', label: 'Executive Summary', icon: <Radar className="w-5 h-5" /> },
     { id: 'TOPOLOGY', label: 'Risk Topology', icon: <Network className="w-5 h-5" /> },
-    { id: 'INCIDENTS', label: 'Active Countermeasures', icon: <AlertOctagon className="w-5 h-5" /> },
+    { id: 'INCIDENTS', label: 'Active Countermeasures', icon: <AlertOctagon className="w-5 h-5" />, badge: 2 },
     { id: 'COSTS', label: 'Telemetry & AI ROI', icon: <DollarSign className="w-5 h-5" /> },
   ];
 
@@ -96,9 +96,13 @@ export function Layout({ children, currentRoute, onRouteChange, user, onLogout }
           <button onClick={toggleTheme} className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
             {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>
-          <button className="relative p-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+          <button 
+            className="relative p-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+            onClick={() => onRouteChange('INCIDENTS')}
+            title="View Pending Actions"
+          >
             <Bell className="w-5 h-5" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white dark:ring-slate-900"></span>
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-500 rounded-full ring-2 ring-white dark:ring-slate-900"></span>
           </button>
           <button className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
             <Settings className="w-5 h-5" />
@@ -115,7 +119,7 @@ export function Layout({ children, currentRoute, onRouteChange, user, onLogout }
                 key={item.id}
                 onClick={() => onRouteChange(item.id)}
                 title={isCollapsed ? item.label : undefined}
-                className={`w-full flex items-center py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                className={`relative w-full flex items-center py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   isCollapsed ? 'justify-center px-0' : 'px-3 gap-3'
                 } ${
                   currentRoute === item.id 
@@ -124,7 +128,15 @@ export function Layout({ children, currentRoute, onRouteChange, user, onLogout }
                 }`}
               >
                 <div className="shrink-0">{item.icon}</div>
-                {!isCollapsed && <span className="truncate">{item.label}</span>}
+                {!isCollapsed && <span className="truncate flex-1 text-left">{item.label}</span>}
+                {item.badge && !isCollapsed && (
+                  <span className="shrink-0 bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400 text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+                    {item.badge}
+                  </span>
+                )}
+                {item.badge && isCollapsed && (
+                  <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-amber-500 border-2 border-white dark:border-slate-900"></span>
+                )}
               </button>
             ))}
           </div>
