@@ -24,7 +24,7 @@ export default function App() {
   const renderContent = () => {
     switch (currentRoute) {
       case 'DASHBOARD':
-        return <Dashboard />;
+        return <Dashboard onRouteChange={setCurrentRoute as any} />;
       case 'TOPOLOGY':
         return <Topology />;
       case 'INCIDENTS':

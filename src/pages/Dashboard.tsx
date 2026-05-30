@@ -1,4 +1,4 @@
-import { AlertTriangle, Zap, Info, Activity, Database, Server, ChevronRight, UserPlus, CheckCircle2 } from 'lucide-react';
+import { AlertTriangle, Zap, Info, Activity, Database, Server, ChevronRight, UserPlus, CheckCircle2, Network } from 'lucide-react';
 import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 
 // Mock telemetry data with history and forecast
@@ -51,21 +51,21 @@ const CustomXAxisTick = ({ x, y, payload }: any) => {
 };
 
 const emergingPatterns = [
-  { id: 10, title: "5xx Rate Anomaly", component: "payment-api", desc: "Sudden burst of 502 Bad Gateway responses on callbacks.", severity: "Critical", time: "10m ago" },
-  { id: 5, title: "Disk I/O Wait Time Increase", component: "auth-db", desc: "Read latency spiking during key validation phase.", severity: "Critical", time: "15m ago" },
-  { id: 6, title: "Spiky CPU Throttling", component: "index-svc", desc: "Containers hitting CPU limits during batch processing.", severity: "Warning", time: "30m ago" },
-  { id: 9, title: "Unhealthy Pod Churn", component: "image-proc", desc: "Multiple pod restarts due to liveness probe timeouts.", severity: "Warning", time: "45m ago" },
-  { id: 1, title: "DB Connection Pool Saturation", component: "checkout-db", desc: "pg-bouncer queue growing 12% hourly against stable RPS.", severity: "Warning", time: "1h ago" },
-  { id: 12, title: "Queue Backlog", component: "email-worker", desc: "Consumer lag indicates processing bottleneck.", severity: "Warning", time: "1h ago" },
-  { id: 2, title: "Memory Leak Signature", component: "nodesrv-v3", desc: "OOM risk profile matches prior regression.", severity: "Critical", time: "2h ago" },
-  { id: 8, title: "Eviction Rate Spike", component: "cache-layer", desc: "Volatile-lru evictions up by 400% against baseline.", severity: "Warning", time: "2h ago" },
-  { id: 7, title: "Dropped Packets", component: "cluster-ingress", desc: "Packet drop rate increasing up to 2% intermittently.", severity: "Notice", time: "4h ago" },
-  { id: 3, title: "API Gateway Latency Shift", component: "api-gateway", desc: "P99 latency trailing drift towards 500ms timeout.", severity: "Notice", time: "5h ago" },
-  { id: 11, title: "High GC Pause", component: "search-api", desc: "JVM garbage collection pauses exceeding 2 seconds.", severity: "Notice", time: "6h ago" },
-  { id: 4, title: "Worker OOM Rate", component: "bg-workers", desc: "Background workers being killed slightly above baseline.", severity: "Notice", time: "12h ago" },
+  { id: 10, title: "5xx Rate Anomaly", component: "payment-api", desc: "Sudden burst of 502 Bad Gateway responses on callbacks.", riskLevel: "High Risk", time: "10m ago" },
+  { id: 5, title: "Disk I/O Wait Time Increase", component: "auth-db", desc: "Read latency spiking during key validation phase.", riskLevel: "High Risk", time: "15m ago" },
+  { id: 6, title: "Spiky CPU Throttling", component: "index-svc", desc: "Containers hitting CPU limits during batch processing.", riskLevel: "Elevated Risk", time: "30m ago" },
+  { id: 9, title: "Unhealthy Pod Churn", component: "image-proc", desc: "Multiple pod restarts due to liveness probe timeouts.", riskLevel: "Elevated Risk", time: "45m ago" },
+  { id: 1, title: "DB Connection Pool Saturation", component: "checkout-db", desc: "pg-bouncer queue growing 12% hourly against stable RPS.", riskLevel: "Elevated Risk", time: "1h ago" },
+  { id: 12, title: "Queue Backlog", component: "email-worker", desc: "Consumer lag indicates processing bottleneck.", riskLevel: "Elevated Risk", time: "1h ago" },
+  { id: 2, title: "Memory Leak Signature", component: "nodesrv-v3", desc: "OOM risk profile matches prior regression.", riskLevel: "High Risk", time: "2h ago" },
+  { id: 8, title: "Eviction Rate Spike", component: "cache-layer", desc: "Volatile-lru evictions up by 400% against baseline.", riskLevel: "Elevated Risk", time: "2h ago" },
+  { id: 7, title: "Dropped Packets", component: "cluster-ingress", desc: "Packet drop rate increasing up to 2% intermittently.", riskLevel: "Anomaly", time: "4h ago" },
+  { id: 3, title: "API Gateway Latency Shift", component: "api-gateway", desc: "P99 latency trailing drift towards 500ms timeout.", riskLevel: "Anomaly", time: "5h ago" },
+  { id: 11, title: "High GC Pause", component: "search-api", desc: "JVM garbage collection pauses exceeding 2 seconds.", riskLevel: "Anomaly", time: "6h ago" },
+  { id: 4, title: "Worker OOM Rate", component: "bg-workers", desc: "Background workers being killed slightly above baseline.", riskLevel: "Anomaly", time: "12h ago" },
 ];
 
-export function Dashboard() {
+export function Dashboard({ onRouteChange }: { onRouteChange?: (route: string) => void }) {
   const scrollToEmerging = () => {
     document.getElementById('emerging-patterns')?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -334,8 +334,15 @@ export function Dashboard() {
                         <CheckCircle2 className="w-4 h-4" />
                         Execute Action
                       </button>
-                      <button className="inline-flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium rounded-md shadow-sm transition-colors">
-                        <UserPlus className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                      <button 
+                        onClick={() => onRouteChange && onRouteChange('TOPOLOGY')}
+                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-sm font-medium rounded-md shadow-sm transition-colors"
+                      >
+                        <Network className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+                        Explore Topology
+                      </button>
+                      <button className="inline-flex items-center gap-2 px-3 py-1.5 bg-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 text-sm font-medium rounded-md transition-colors">
+                        <UserPlus className="w-4 h-4" />
                         Assign Team
                       </button>
                     </div>
@@ -360,8 +367,8 @@ export function Dashboard() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[800px]">
               <thead className="bg-slate-50/50 dark:bg-slate-800/20">
-                <tr className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                   <th className="font-medium px-4 py-2 border-b border-slate-200 dark:border-slate-800">Severity</th>
+                 <tr className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                   <th className="font-medium px-4 py-2 border-b border-slate-200 dark:border-slate-800">Risk Indicator</th>
                    <th className="font-medium px-4 py-2 border-b border-slate-200 dark:border-slate-800">Signature & Description</th>
                    <th className="font-medium px-4 py-2 border-b border-slate-200 dark:border-slate-800">Subsystem</th>
                    <th className="font-medium px-4 py-2 border-b border-slate-200 dark:border-slate-800 text-right">First Seen</th>
@@ -372,11 +379,11 @@ export function Dashboard() {
                   <tr key={pattern.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors group cursor-pointer">
                     <td className="px-4 py-2 whitespace-nowrap">
                       <span className={`inline-flex items-center text-[10px] font-medium px-1.5 py-0.5 rounded border uppercase tracking-wider ${
-                          pattern.severity === 'Critical' ? 'text-rose-600 border-rose-200 bg-rose-50 dark:text-rose-400 dark:border-rose-900/50 dark:bg-rose-500/10' :
-                          pattern.severity === 'Warning' ? 'text-amber-600 border-amber-200 bg-amber-50 dark:text-amber-400 dark:border-amber-900/50 dark:bg-amber-500/10' :
+                          pattern.riskLevel === 'High Risk' ? 'text-rose-600 border-rose-200 bg-rose-50 dark:text-rose-400 dark:border-rose-900/50 dark:bg-rose-500/10' :
+                          pattern.riskLevel === 'Elevated Risk' ? 'text-amber-600 border-amber-200 bg-amber-50 dark:text-amber-400 dark:border-amber-900/50 dark:bg-amber-500/10' :
                           'text-indigo-600 border-indigo-200 bg-indigo-50 dark:text-indigo-400 dark:border-indigo-900/50 dark:bg-indigo-500/10'
                         }`}>
-                          {pattern.severity}
+                          {pattern.riskLevel}
                       </span>
                     </td>
                     <td className="px-4 py-2">
