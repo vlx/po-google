@@ -33,7 +33,7 @@ export function Layout({ children, currentRoute, onRouteChange, user, onLogout }
     { id: 'DASHBOARD', label: 'Executive Summary', icon: <Radar className="w-5 h-5" /> },
     { id: 'TOPOLOGY', label: 'Risk Topology', icon: <Network className="w-5 h-5" /> },
     { id: 'INCIDENTS', label: 'Active Countermeasures', icon: <AlertOctagon className="w-5 h-5" /> },
-    { id: 'COSTS', label: 'Telemetry Costs', icon: <DollarSign className="w-5 h-5" /> },
+    { id: 'COSTS', label: 'Telemetry & AI ROI', icon: <DollarSign className="w-5 h-5" /> },
   ];
 
   return (
