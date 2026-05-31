@@ -3,13 +3,13 @@ import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Respon
 
 // Mock telemetry data with history and forecast
 const telemetryData = [
-  { time: '00:00', load: 45, forecast: 45 },
-  { time: '04:00', load: 52, forecast: 52 },
-  { time: '08:00', load: 78, forecast: 78 },
-  { time: '12:00', load: 85, forecast: 85 },
-  { time: '16:00', load: 70, forecast: 70 },
-  { time: '20:00', load: 60, forecast: 60 },
-  { time: 'Now', load: 55, forecast: 55 },
+  { time: '00:00', load: 35, forecast: 45 },
+  { time: '04:00', load: 50, forecast: 52 },
+  { time: '08:00', load: 55, forecast: 78 },
+  { time: '12:00', load: 55, forecast: 85 },
+  { time: '16:00', load: 48, forecast: 70 },
+  { time: '20:00', load: 45, forecast: 60 },
+  { time: 'Now', load: 42, forecast: 55 },
   { time: '+04:00', forecast: 92, isPrediction: true, incident: "Conn Timeout", prob: "92%" },
   { time: '+08:00', forecast: 88, isPrediction: true },
   { time: '+12:00', forecast: 85, isPrediction: true, risk: true, incident: "Worker OOM", prob: "85%" },
