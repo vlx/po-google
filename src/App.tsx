@@ -3,6 +3,7 @@ import { Login } from './pages/Login';
 import { Layout } from './components/Layout';
 import { Dashboard } from './pages/Dashboard';
 import { Topology } from './pages/Topology';
+import { Incidents } from './pages/Incidents';
 import { Costs } from './pages/Costs';
 import type { AppRoute, UserContext } from './types';
 
@@ -14,7 +15,7 @@ export default function App() {
     id: 'u-1',
     name: 'SRE Lead',
     role: 'Staff Reliability Engineer',
-    email: 'vlikyov@gmail.com'
+    email: 'sre@acme.com'
   };
 
   if (!isAuthenticated) {
@@ -24,11 +25,11 @@ export default function App() {
   const renderContent = () => {
     switch (currentRoute) {
       case 'DASHBOARD':
-        return <Dashboard />;
+        return <Dashboard onRouteChange={setCurrentRoute as any} />;
       case 'TOPOLOGY':
         return <Topology />;
       case 'INCIDENTS':
-        return <div className="text-slate-600 dark:text-slate-400 p-8 border border-slate-200 dark:border-slate-800/50 rounded-lg text-center">Active Incidents module pending implementation...</div>;
+        return <Incidents />;
       case 'COSTS':
         return <Costs />;
       default:
