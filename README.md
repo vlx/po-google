@@ -6,7 +6,7 @@
 
 This contains everything you need to run your app locally.
 
-View published app: https://apm-predictive-observability-508684461073.europe-west3.run.app
+View your app in AI Studio: https://ai.studio/apps/22d39f98-a0bf-4f08-9494-504bf3becc40
 
 ## Run Locally
 
